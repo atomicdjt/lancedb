@@ -68,8 +68,17 @@ even though `optimize()` bundles both in one LanceDB Embedded call.
 ## Submit Enterprise compaction {#enterprise-manual-compaction}
 
 Use an existing Enterprise table and a connection configured for its database.
-The CLI needs Flight SQL connectivity to submit the job and REST connectivity
-to read table settings and job progress.
+The `lancedb admin ...` and `lancedb job ...` examples on this page require the
+**Enterprise administrative CLI**, available from your deployment administrator.
+Check that `lancedb --help` lists `admin` and `job`. It needs Flight SQL
+connectivity to submit the job and REST connectivity to read table settings and
+job progress.
+
+The [public CLI installation](/tools/cli#install) supplies the client commands
+`auth`, `profile`, and `sql`, without the administrative commands. You can use
+that client for the SQL alternative below or submit through an SDK. Ask your
+deployment administrator for the Enterprise CLI when you need the administrative
+examples.
 
 <Note>
 Use versions of the SDK, query nodes, agents, and workers that support these
@@ -139,8 +148,16 @@ async fn compact(table: &Table) -> lancedb::Result<()> {
 ```
 </CodeGroup>
 
-Add `--branch exp` to the CLI command or `branch = 'exp'` to SQL's `WITH`
-clause to target a branch. SDK calls use the table handle's selected branch.
+With the public CLI, execute SQL directly using a profile configured for the
+same database and Flight SQL endpoint:
+
+```bash
+lancedb sql --profile production --command \
+  'OPTIMIZE events REWRITE DATA WITH (max_source_rows = 1000000);'
+```
+
+Add `--branch exp` to the Enterprise CLI's `admin table optimize` command or
+`branch = 'exp'` to SQL's `WITH` clause to target a branch. SDK calls use the table handle's selected branch.
 Without a branch, the job targets main. A nonexistent branch can be accepted at
 submission and fail asynchronously.
 
@@ -162,9 +179,12 @@ lancedb job describe --job-id JOB_ID
 lancedb job events --job-id JOB_ID
 ```
 
-Under Standard authorization, submission requires table Ownership. Describing
-jobs requires system Operate, and listing jobs or reading events requires system
-Usage. Successful submission alone does not grant those inspection privileges.
+Under Standard authorization, submission requires table Ownership. `job describe`
+accepts system Usage or, for a table job, Usage on its database and every namespace
+in its path. `job list` and `job events` require system Usage; `job cancel`
+requires system Operate. An unauthorized describe request returns 404 to hide
+the job's existence; denied list/events requests return 403. Submission does not
+grant system-level access to job lists or events.
 
 Manual compaction uses one worker with atomic execution and inline index
 remapping. Remote `optimize` does not prune old versions or optimize indexes;
