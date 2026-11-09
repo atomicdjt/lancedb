@@ -148,7 +148,7 @@ after submission, before workers finish. Returned compaction counts are
 placeholders. Remote optimize does not prune versions or optimize indexes;
 explicit requests for those unsupported operations are rejected. The synchronous
 Python `compact_files()` and `cleanup_old_versions()` helpers remain warning-only
-no-ops on remote tables.
+no-ops in LanceDB Enterprise.
 
 Manual compaction accepts four invocation options and inherits omitted fields
 from the selected branch's table tuning, then deployment/built-in defaults.
