@@ -158,8 +158,8 @@ lancedb sql --profile production --command \
 
 Add `--branch exp` to the Enterprise CLI's `admin table optimize` command or
 `branch = 'exp'` to SQL's `WITH` clause to target a branch. SDK calls use the table handle's selected branch.
-Without a branch, the job targets main. A nonexistent branch can be accepted at
-submission and fail asynchronously.
+Without a branch, the job targets main. CLI and SQL validate the table and branch
+through the service catalog before creating a job.
 
 The call returns after durable submission, before the worker finishes. CLI and
 SQL expose a job ID; SDK compaction counts are placeholders rather than final

@@ -276,7 +276,8 @@ later table changes affect future jobs.
 The statement returns a `job_id` after submission, before worker completion.
 It runs atomic compaction on one worker with inline index remapping, without
 pruning versions or optimizing indexes. A whole-task source-row budget can
-produce a successful no-op, and an unknown branch can fail asynchronously.
+produce a successful no-op. The table and branch are validated through the
+service catalog before creating a job.
 
 See [manual compaction](/maintenance/compaction#enterprise-manual-compaction)
 for the option meanings, supported deployment and version requirements,
